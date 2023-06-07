@@ -8,7 +8,7 @@ if user_file_type == 'y' or user_file_type == 'Y':
     docx = f'{docx_name}.docx'
 else:
     pdf_name = input('Please input the pdf file name and make sure it is in the same directory: ')
-    convert_file = f'{pdf_name.pdf}'
+    convert_file = f'{pdf_name}.pdf'
     docx = f'{pdf_name}.docx' 
     pdf.convert(f'{pdf_name}.pdf', docx)
 
