@@ -11,14 +11,14 @@ def convert(pdf_name, docx_name):
 def get_tables(docx):
     data = []
     doc = Document(docx)
-    table = doc.tables[0]
-    keys = None
-    for i, row in enumerate(table.rows):
-        text = (cell.text.replace('\n', ' ')for cell in row.cells)
-        if i == 0:
-            keys = tuple(text)
-            continue
-        row_data = dict(zip(keys, text))
-        data.append(row_data)
-        print (data)
+    for table in doc.tables:
+        keys = None
+        for i, row in enumerate(table.rows):
+            text = (cell.text.replace('\n', ' ')for cell in row.cells)
+            if i == 0:
+                keys = text
+                continue
+            row_data = dict(zip(keys, text))
+            data.append(row_data)
+    print(data)
 get_tables('335.docx')
