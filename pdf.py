@@ -1,4 +1,5 @@
 from pdf2docx import Converter
+from docx.shared import Pt, Cm
 from docx import Document
 import PyPDF2
 
@@ -7,6 +8,22 @@ def convert(pdf_name, docx_name):
     cv = Converter(pdf_name)
     new = cv.convert(docx_name)      # all pages by default
     cv.close()
+    doc = Document(docx_name) 
+    for table in doc.tables:
+        table.autofit = False
+        for row in table.rows:
+            row.height //= 3
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        if run.font.size is not None:
+                            run.font.size //= 3
+    doc.save(docx_name)
+
+        # table.autofit = False
+        # for row in table.rows:
+        #     row.height = 130000
+    # doc.save(docx_name)
 
 def get_tables(docx):
     data = []
@@ -21,4 +38,4 @@ def get_tables(docx):
             row_data = dict(zip(keys, text))
             data.append(row_data)
     print(data)
-get_tables('335.docx')
+convert('335.pdf', '335.docx')
