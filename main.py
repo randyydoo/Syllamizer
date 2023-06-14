@@ -11,5 +11,6 @@ else:
     convert_file = f'{pdf_name}.pdf'
     docx = f'{pdf_name}.docx' 
     pdf.convert(f'{pdf_name}.pdf', docx)
+    pdf.resize_table(docx)
 
 

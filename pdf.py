@@ -2,10 +2,9 @@ from pdf2docx import Converter
 from docx import Document
 import PyPDF2
 
-t1 = {}
 def convert(pdf_name, docx_name):
     cv = Converter(pdf_name)
-    new = cv.convert(docx_name)      # all pages by default
+    new = cv.convert(docx_name)      
     cv.close()
 
 def is_bold(cell):
@@ -42,4 +41,3 @@ def get_tables(docx):
         #     data.append(row_data)
     # print(data)
 get_tables('335.docx')
-# convert('335.pdf', '335.docx')
