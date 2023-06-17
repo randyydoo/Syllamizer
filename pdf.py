@@ -15,7 +15,8 @@ def is_bold(cell):
     return True
 def get_tables(docx):
     keys = []
-    data = []
+    contents = []
+    data
     doc = Document(docx)
     for table in doc.tables:
         for row in table.rows:
@@ -25,19 +26,10 @@ def get_tables(docx):
                 elif is_bold(cell):
                     keys.append(cell.text)
                 else:
-                    data.append(cell.text)
-    print(keys) 
+    for key in keys:
+        for content in contents:
+            pair = dict(zip(key,content))
+            data.append(pair)
+            continue
 
-
-
-
-        # keys = None
-        # for i, row in enumerate(table.rows):
-        #     text = (cell.text.replace('\n', ' ')for cell in row.cells)
-        #     if i == 0:
-        #         keys = text
-        #         continue
-        #     row_data = dict(zip(keys, text))
-        #     data.append(row_data)
-    # print(data)
 get_tables('335.docx')
