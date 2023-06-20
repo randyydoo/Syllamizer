@@ -8,8 +8,7 @@ def is_bold(cell: 'class') -> bool:
                 return False
     return True
 def get_tables(docx: str) -> None:
-    redact = ['Grade', 'Percentage', '']
-    keys = []
+    keys = []  #list of lists list of tables and contents
     contents = []
     doc = Document(docx)
 
@@ -23,22 +22,8 @@ def get_tables(docx: str) -> None:
         if len(temp) != 0:
             keys.append(temp)
     print(keys)
-    # for table in doc.tables:
-    #     labels = []
-    #     for row in table.rows:
-    #         row_amt = len(row.cells)
-    #         bold = True
-    #         for cell in row.cells:
-    #             if cell.text in redact:
-    #                 continue
-    #             elif not is_bold(cell):
-    #                 bold = False
-    #             if bold:
-    #                 labels.append(cell.text)
-    #     if len(labels) != 0:
-    #         keys.append(labels)
-    # print(keys)
-# def get_title(docx: str) -> str:
+
+def get_title(docx: str) -> str:
 
 def get_text(docx: str) -> None:
     # read text starting from bold and end when new bold word
