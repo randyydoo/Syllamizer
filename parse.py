@@ -50,8 +50,8 @@ def get_keys_tables(docx: str) -> list[list[str]]:
             contents.append(contentTemp)
         if len(keyTemp) != 0 and not skip:
             keys.append(keyTemp)
-            print(contents[i][j])
-
+    print(len(keys))
+    print(len(contents))
 
 
 
@@ -88,4 +88,4 @@ def get_text(docx: str) -> None:
         if count == 3:
             return
 get_content_tables('335.docx')
-get_keys_tables('335.docx')
+get_keys_tables('240.docx')
