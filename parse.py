@@ -1,29 +1,36 @@
 from docx import Document
 import PyPDF2
 
+redact = ['Grade', 'Percentage' 'A:', 'A-']
 def is_bold(cell: 'class') -> bool:
     for paragraph in cell.paragraphs:
         for run in paragraph.runs:
             if not run.bold:
                 return False
     return True
+
 def get_keys_tables(docx: str) -> list[list[str]]:
-    redact = ['Grade', 'Percentage']
     keys = []  
     contents = [] 
-    doc = Document(docx)
-
+    doc = Document(docx)    
     for table in doc.tables:
         contentTemp, keyTemp = [], []
+        new, extend = False, False
         bold, skip= True, False
         for i, row in enumerate(table.rows):
             temp = []
-            for cell in row.cells:
+            for j, cell in enumerate(row.cells):
+                if j + i == 0:
+                    try:
+                        curr = int(cell.text)
+                        new = True
+                    except:
+                        continue
                 if cell.text in redact:
                     skip = True
                 if is_bold(cell) and i == 0:
                     keyTemp.append(cell.text)
-                elif len(keyTemp) != 0:
+                elif len(keyTemp) != 0 or new == True:
                     if cell.text == '':
                         temp.append('None')
                     else:
@@ -34,11 +41,32 @@ def get_keys_tables(docx: str) -> list[list[str]]:
             contents.append(contentTemp)
         if len(keyTemp) != 0 and not skip:
             keys.append(keyTemp)
-    print(keys)
+    # print(keys)
     print(len(contents))
-    print(contents)
+    print(contents[1])
 
-# def get_content_tables(docx: str) -> list[list[str]]:
+
+def get_content_tables(docx: str) -> list[list[str]]:
+    contents = []
+    doc = Document(docx)
+    for table in doc.tables:
+        contentTemp = []
+        skip = False
+        for i, row in enumerate(table.rows):
+            temp = []
+            for cell in row.cells:
+                if i == 0 and cell.text in redact:
+                    skip = True
+                elif cell.text == '' or len(cell.text) == 0:
+                    temp.append('None')
+                else:
+                    temp.append(cell.text)
+            if len(temp) > 0 and skip is False:
+                contentTemp.append(temp)
+        if len(contentTemp) > 0 and skip is False:
+            contents.append(contentTemp)
+    # print(contents)
+    # print(len(contents))
 
 
 def get_text(docx: str) -> None:
@@ -50,4 +78,5 @@ def get_text(docx: str) -> None:
         count += 1
         if count == 3:
             return
-get_keys_tables('362.docx')
+get_content_tables('335.docx')
+get_keys_tables('335.docx')
