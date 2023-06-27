@@ -22,28 +22,37 @@ def get_keys_tables(docx: str) -> list[list[str]]:
             for j, cell in enumerate(row.cells):
                 if j + i == 0:
                     try:
+                        prev = int(contents[-1][-1][0])
                         curr = int(cell.text)
-                        new = True
+                        if curr - prev == 1:
+                            extend = True
                     except:
-                        continue
+                        try:
+                            curr = int(cell.text)
+                            if curr <= 20:
+                                new = True
+                        except:
+                            continue
                 if cell.text in redact:
                     skip = True
                 if is_bold(cell) and i == 0:
                     keyTemp.append(cell.text)
-                elif len(keyTemp) != 0 or new == True:
+                elif len(keyTemp) != 0 or new is True or extend is True:
                     if cell.text == '':
                         temp.append('None')
                     else:
                         temp.append(cell.text)
-            if len(temp) != 0:
+            if extend is True and len(temp) > 0:
+                contents[-1].append(temp)
+            elif len(temp) != 0:
                 contentTemp.append(temp)
         if len(contentTemp) != 0 and not skip:
             contents.append(contentTemp)
         if len(keyTemp) != 0 and not skip:
             keys.append(keyTemp)
-    # print(keys)
-    print(len(contents))
-    print(contents[1])
+            print(contents[i][j])
+
+
 
 
 def get_content_tables(docx: str) -> list[list[str]]:
