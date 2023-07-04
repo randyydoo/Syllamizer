@@ -62,6 +62,8 @@ def get_contents(docx: str) -> list[list[str]]:
                 if is_bold(cell) and i == 0:
                     keyTemp.append(cell.text)
                 elif len(keyTemp) != 0 or new is True or extend is True:
+                    if '\n' in cell.text:
+                        cell.text = cell.text.replace('\n', ' ')
                     if cell.text == '':
                         temp.append('None')
                     else:
@@ -75,3 +77,4 @@ def get_contents(docx: str) -> list[list[str]]:
         if len(keyTemp) != 0 and not skip:
             keys.append(keyTemp)
     return contents
+print(get_contents('335.docx'))
