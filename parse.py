@@ -25,60 +25,11 @@ def get_keys(docx: str) -> list[list[str]]:
                 temp.append(cell.text)
         if len(temp) != 0:
             keys.append(temp)
-    print(keys)
-    print(len(keys))
-
-def get_contents(docx: str) -> list[list[list[str]]]:
-    contents = [] 
-    doc = Document(docx)
-
-    for table in doc.tables:
-        contentTemp = []
-        skip, bold, newTable, extendTable = False, True, False, False
-
-        for i, row in enumerate(table.rows):
-            tempRow = []
-
-            for j, cell in enumerate(row.cells):
-                if cell.text in redact:
-                    skip = True
-
-                if j + i == 0:
-                    try:
-                        prev = int(contents[-1][-1][0])
-                        curr = int(cell.text)
-                        if curr - prev == 1:
-                            extendTable = True
-                    except:
-
-                        try:
-                            curr = int(cell.text)
-                            if curr <= 20:
-                                newTable = True
-                        except:
-                            continue
-                if is_bold(cell):
-                    continue
-                if len(cell.text) != 0 or newTable is True or extendTable is True:
-                    if cell.text == '':
-                        tempRow.append('None')
-                    else:
-                        tempRow.append(cell.text)
-            if extendTable is True and len(tempRow) > 0:
-                contents[-1].append(tempRow)
-            elif len(tempRow) != 0:
-                contentTemp.append(tempRow)
-        if len(contentTemp) != 0 and skip is False:
-            contents.append(contentTemp)
-
-    print(contents[3])
-    print(len(contents))
+    return keys
 
 
 
-
-
-def test(docx: str) -> list[list[str]]:
+def get_contents(docx: str) -> list[list[str]]:
     keys = []  
     contents = [] 
     doc = Document(docx)    
@@ -123,7 +74,4 @@ def test(docx: str) -> list[list[str]]:
             contents.append(contentTemp)
         if len(keyTemp) != 0 and not skip:
             keys.append(keyTemp)
-    print(contents)
-    print(len(contents))
-
-test('240.docx')
+    return contents
