@@ -82,13 +82,19 @@ def test(docx: str) -> list[list[str]]:
     keys = []  
     contents = [] 
     doc = Document(docx)    
+
     for table in doc.tables:
         contentTemp, keyTemp = [], []
         new, extend = False, False
         bold, skip= True, False
+
         for i, row in enumerate(table.rows):
             temp = []
+
             for j, cell in enumerate(row.cells):
+                if cell.text in redact:
+                    skip = True
+
                 if j + i == 0:
                     try:
                         prev = int(contents[-1][-1][0])
@@ -102,8 +108,6 @@ def test(docx: str) -> list[list[str]]:
                                 new = True
                         except:
                             continue
-                if cell.text in redact:
-                    skip = True
                 if is_bold(cell) and i == 0:
                     keyTemp.append(cell.text)
                 elif len(keyTemp) != 0 or new is True or extend is True:
