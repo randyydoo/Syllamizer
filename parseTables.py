@@ -77,4 +77,3 @@ def get_contents(docx: str) -> list[list[str]]:
         if len(keyTemp) != 0 and not skip:
             keys.append(keyTemp)
     return contents
-print(get_contents('335.docx'))
