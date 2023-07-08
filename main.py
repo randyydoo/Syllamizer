@@ -1,4 +1,5 @@
 import pdf
+import tables
 
 def get_file_name():
     user_file_type = input("Is you syllabus a docx file? (y/n): ")
