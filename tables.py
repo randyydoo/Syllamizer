@@ -13,27 +13,39 @@ def get_longest_str(d: dict) -> list:
     return lengths
 
 
+def get_col_max(table: int, index: int, keys: list[list], contents: list[list[list]]) -> int:
+    length = len(keys[table][index])
+    for row in contents[table]:
+        text = row[index]
+        length = max(length, len(text))
+    return length
+
+
+
+
+
 def get_file(file_name: str) -> None:
 
     wb = Workbook() 
-
+    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     keys = parseTables.get_keys(file_name)
     contents = parseTables.get_contents(file_name)
-    dict = {letter: [0] for letter in string.ascii_uppercase} 
 
     for i, lst in enumerate(keys):
-        temp_max = get_longest_str(lst)
         temp_sheet = wb.create_sheet(f'Sheet {i + 1}', i)
         temp_sheet.append(lst)
 
         for row in contents[i]:
-            for j, text in enumerate(row):
-
             temp_sheet.append(row)
-            max_len_str = get_longest_str(row)
-            if max_len_str > temp_max:
-                temp_max = max_len_str
-            
+
+        for j in range(len(keys[i])):
+            col = alphabet[j]
+            longest = get_col_max(i, j,keys,contents)
+            temp_sheet.column_dimensions[col].width = longest
+        # temp_sheet.column_dimensions['B'].width = 200
+        # temp_sheet.column_dimensions['C'].width = 200
+
     wb.save('ran.xlsx')
 
 
