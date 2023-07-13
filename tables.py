@@ -53,7 +53,7 @@ def get_file(file_name: str) -> None:
     contents = parseTables.get_contents(file_name)
 
     for i, lst in enumerate(keys):
-        temp_sheet = wb.create_sheet(f'Sheet {i + 1}', i)
+        temp_sheet = wb.create_sheet(f'Table {i + 1}', i)
         temp_sheet.append(lst)
         apply_keys_styles(1, temp_sheet)
 
