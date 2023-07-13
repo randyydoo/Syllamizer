@@ -31,6 +31,7 @@ def apply_keys_styles(row: int, sheet: object) -> None:
         top=Side(style='thin', color='000000'),
         bottom=Side(style='thin', color='000000'),
         )
+    alignment = Alignment(horizontal='center', vertical='center')
 
     if row == 1:
         font = Font(name = 'Calibri',size = 18, bold = True)
@@ -42,6 +43,7 @@ def apply_keys_styles(row: int, sheet: object) -> None:
 
     for cell in sheet[row]:
         cell.border = border
+        cell.alignment = alignment
         cell.font = font
         cell.fill = fill
 
