@@ -1,4 +1,6 @@
 from docx import Document
+from docx.oxml.ns import nsdecls
+from docx.oxml import parse_xml
 from docx.opc.constants import RELATIONSHIP_TYPE as rt
 
 links = ['@fullerton.edu', 'zoom.us']
@@ -37,8 +39,7 @@ def loop_til_bold(start: int, file_name: str) -> str:
         for run in paragraph.runs:
             if run.bold:
                 return text
-            else:
-                text += run.text
+        text += paragraph.text
 
 def get_runs(file_name: str) -> dict:
     dict = {} # {'header': text}
@@ -49,8 +50,7 @@ def get_runs(file_name: str) -> dict:
             for run in paragraph.runs:
                 if header in run.text.lower() and run.bold:
                     txt = loop_til_bold(i, file_name)
-                    print(f'RUN: {run.text}')
-                    print(f'PARAGRAPH: {txt}')
-                    # print(f'PARAGRAPH: {doc.paragraphs[i + 1].text}\n')
+                    dict[header] = txt
+    return dict
 
 get_runs('240.docx')
