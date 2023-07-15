@@ -11,16 +11,8 @@ headers = [
     'grading standards and criteria',
     'description of assessed work',
     'late',
-    'attendance policy',
-    'attendance',
     'important dates'
 ]
-def first_run_bold(paragraph: object) -> bool:
-    for i, run in enumerate(paragraph.runs):
-        if i == 0 and run.bold:
-            return False
-        else:
-            return True
 
 def get_links(file_name: str) -> dict:
     dict = {} # {rel_id: link} 
@@ -36,15 +28,29 @@ def get_links(file_name: str) -> dict:
                 dict[rel] = link_url
     return dict
 
+
+def loop_til_bold(start: int, file_name: str) -> str:
+    doc = Document(file_name)
+    text = ''
+    for i in range(start + 1, len(doc.paragraphs) - 1):
+        paragraph = doc.paragraphs[i]
+        for run in paragraph.runs:
+            if run.bold:
+                return text
+            else:
+                text += run.text
+
 def get_runs(file_name: str) -> dict:
     dict = {} # {'header': text}
     doc = Document(file_name)
 
-    
     for header in headers:
-        for paragraph in doc.paragraphs:
-            for i, run in enumerate(paragraph.runs):
+        for i, paragraph in enumerate(doc.paragraphs):
+            for run in paragraph.runs:
                 if header in run.text.lower() and run.bold:
-                    print(run.text)
+                    txt = loop_til_bold(i, file_name)
+                    print(f'RUN: {run.text}')
+                    print(f'PARAGRAPH: {txt}')
+                    # print(f'PARAGRAPH: {doc.paragraphs[i + 1].text}\n')
 
-get_runs('240.do')
+get_runs('240.docx')
