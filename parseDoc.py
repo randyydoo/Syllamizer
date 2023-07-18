@@ -7,12 +7,12 @@ links = ['@fullerton.edu', 'zoom.us']
 headers = [
     'catalog description',
     'course description',
-    'course goal',
+    'goal',
     'course purpose',
     'required textbook',
     'grading standards and criteria',
     'description of assessed work',
-    'late',
+    'late policy',
     'important dates'
 ]
 
@@ -51,6 +51,6 @@ def get_runs(file_name: str) -> dict:
                 if header in run.text.lower() and run.bold:
                     txt = loop_til_bold(i, file_name)
                     dict[header] = txt
-    return dict
+    print(dict)
 
 get_runs('240.docx')
