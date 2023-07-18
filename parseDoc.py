@@ -45,7 +45,7 @@ def til_bold(file_name: str, start: int) -> str:
                 return text
             text += run.text
 
-def get_headers(file_name: str) -> list:
+def get_headers(file_name: str) -> list[list[str, int]]:
     list = [] # ['header', para num]
     doc = Document(file_name)
     for header in headers:
@@ -58,8 +58,8 @@ def get_headers(file_name: str) -> list:
                     list.append([f'{header}:', i])
     return list 
 
-def get_text(file_name: str, h: list[list]) -> dict:
-    dict = {}
+def get_text(file_name: str, h: list[list[str, int]]) -> list:
+    list = []
     doc = Document(file_name)
 
     for i in range(len(h)):
@@ -67,7 +67,18 @@ def get_text(file_name: str, h: list[list]) -> dict:
         p_num = h[i][1]
         text = doc.paragraphs[p_num].text
         if len(text) <= len(header) * 2.5:
-            dict[header] = f'{til_bold(file_name, p_num)} FUNCT'
+            list.append(til_bold(file_name, p_num))
         else:
-            dict[header] = text[len(header):]
+            list.append(text[len(header):])
+    return list
+
+def get_headers_and_text(h: list[list[str, int]], t: list[str]) -> dict:
+    dict = {}
+    
+    for i in range(len(h)):
+        header = h[i][0]
+        text = t[i]
+        dict[header] = text
+
     return dict
+
