@@ -1,19 +1,18 @@
 from docx import Document
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
 from docx.opc.constants import RELATIONSHIP_TYPE as rt
 
 links = ['@fullerton.edu', 'zoom.us']
 headers = [
-    'catalog description',
-    'course description',
-    'goal',
-    'course purpose',
-    'required textbook',
-    'grading standards and criteria',
-    'description of assessed work',
-    'late policy',
-    'important dates'
+    'Catalog Description',
+    'Course Description',
+    'Course Goal',
+    'Student Learning Goals',
+    'Course Purpose',
+    'Required Textbook',
+    'Grading Standards',
+    'Late Policy',
+    'Late Submission',
+    'Important Dates'
 ]
 
 def get_links(file_name: str) -> dict:
@@ -30,8 +29,13 @@ def get_links(file_name: str) -> dict:
                 dict[rel] = link_url
     return dict
 
+# check if header == paragraph
+def is_cleaned(header: str, paragraph: object) -> bool:
+    cleaned = header.replace(' ', '')
+    return cleaned.lower() in paragraph.text.lower()
 
-def loop_til_bold(start: int, file_name: str) -> str:
+# loop until next bold word
+def til_bold(file_name: str, start: int) -> str:
     doc = Document(file_name)
     text = ''
     for i in range(start + 1, len(doc.paragraphs) - 1):
@@ -39,18 +43,31 @@ def loop_til_bold(start: int, file_name: str) -> str:
         for run in paragraph.runs:
             if run.bold:
                 return text
-        text += paragraph.text
+            text += run.text
 
-def get_runs(file_name: str) -> dict:
-    dict = {} # {'header': text}
+def get_headers(file_name: str) -> list:
+    list = [] # ['header', para num]
     doc = Document(file_name)
-
     for header in headers:
         for i, paragraph in enumerate(doc.paragraphs):
-            for run in paragraph.runs:
-                if header in run.text.lower() and run.bold:
-                    txt = loop_til_bold(i, file_name)
-                    dict[header] = txt
-    print(dict)
+            if is_cleaned(header, paragraph):
+                list.append([f'{header}:', i])
+                break
+            for j, run in enumerate(paragraph.runs):
+                if header.lower() in run.text.lower() and j == 0:
+                    list.append([f'{header}:', i])
+    return list 
 
-get_runs('240.docx')
+def get_text(file_name: str, h: list[list]) -> dict:
+    dict = {}
+    doc = Document(file_name)
+
+    for i in range(len(h)):
+        header = h[i][0]
+        p_num = h[i][1]
+        text = doc.paragraphs[p_num].text
+        if len(text) <= len(header) * 2.5:
+            dict[header] = f'{til_bold(file_name, p_num)} FUNCT'
+        else:
+            dict[header] = text[len(header):]
+    return dict
