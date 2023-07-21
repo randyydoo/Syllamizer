@@ -1,2 +1,2 @@
-# Syllamizer
-Insert a syllabus file and get a quick summary of all important details
+# Syllabus Simplified
+Shortens multiple syllabus documents into a single page through the TextRank algorithm and abstractive text summarization with PyTorch
