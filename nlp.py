@@ -5,41 +5,62 @@ import nltk
 from nltk import sent_tokenize, word_tokenize
 from nltk.cluster.util import cosine_distance
 nltk.download('punkt')
-
 nlp = spacy.load("en_core_web_sm")
-stop_words = list(spacy.lang.en.stop_words.STOP_WORDS)
 
 headers = parseDoc.get_headers('335.docx')
 texts = parseDoc.get_text('335.docx', headers)
 
+def remove_tabs(sections: list) -> list:
+    redact = ['-', '\n', '\t●', '\r']
+    for i in range(len(sections)):
+        text = sections[i]
+        for r in redact:
+            if r in text:
+                text = text.replace(r, ' ')
+        sections[i] = text
+    return sections
 
-def clean_text(s: str) -> str:
-    redact = ['\n', '\t●', '\r']
-    for r in redact:
-        if r in s:
-            s = s.replace(r, '')
-    return s
+def remove_punct(sections: list) -> list:
+    for i in range(len(sections)):
+        text = sections[i]
+        tokens = nlp(text)
+        for token in tokens:
+            if token.is_punct:
+            # if token.is_punct and token.text != '%':
+                text = text.replace(token.text, '')
+        sections[i] = text.strip()
+    return sections
 
-def clean_stopwords(sections: list) -> list:
-    print(sections[0])
-    lst = []
-    cleared = []
-    for section in sections:
+def remove_stopwords(sections: list) -> list:
+    for i in range(len(sections)):
         s = ''
-        tokens = nlp(section)
+        text = sections[i]
+        tokens = nlp(text)
         for token in tokens:
             if not token.is_stop:
                 s += token.text + ' '
-        lst.append(s)
-    print(lst[0])
-    # return lst
+        sections[i] = s
+    return sections
 
-def get_new_text(texts: list) -> list:
-    lst = []
-    for text in texts:
-        cleaned = clean_text(text)
-        lst.append(cleaned)
-    return lst
+def lemmatize(sections: list) -> list:
+    for i in range(len(sections)):
+        s = ''
+        text = sections[i]
+        tokens = nlp(text)
+        for token in tokens:
+            if len(token.text.strip()) != 0:
+                s += token.lemma_ + ' '
+        sections[i] = s
+    return sections
 
-temp = get_new_text(texts)
-clean_stopwords(temp)
+
+# print(texts)
+temp = remove_tabs(texts)
+# print(temp)
+t2 = remove_punct(temp)
+# print(t2)
+t3 = remove_stopwords(t2)
+print(t3, '\n\n')
+t4 = lemmatize(t3)
+print(t4)
+
