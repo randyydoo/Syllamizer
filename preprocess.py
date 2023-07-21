@@ -53,14 +53,9 @@ def lemmatize(sections: list) -> list:
         sections[i] = s
     return sections
 
-
-# print(texts)
-temp = remove_tabs(texts)
-# print(temp)
-t2 = remove_punct(temp)
-# print(t2)
-t3 = remove_stopwords(t2)
-print(t3, '\n\n')
-t4 = lemmatize(t3)
-print(t4)
+def tokenize(sections: list) -> list:
+    for i in range(len(sections)):
+        text = sections[i]
+        sections[i] = word_tokenize(text)
+    return sections
 
