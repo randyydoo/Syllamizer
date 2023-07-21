@@ -70,6 +70,11 @@ def get_text(file_name: str, h: list[list[str, int]]) -> list:
             list.append(til_bold(file_name, p_num))
         else:
             list.append(text[len(header):])
+
+    for i in range(len(list)):
+        text = list[i]
+        list[i] = text.strip()
+
     return list
 
 def get_headers_and_text(h: list[list[str, int]], t: list[str]) -> dict:
