@@ -2,8 +2,10 @@ import parseDoc
 import numpy as np
 import spacy
 import nltk
+import string
 from nltk import sent_tokenize, word_tokenize
 from nltk.cluster.util import cosine_distance
+from collections import Counter
 
 nltk.download('punkt')
 nlp = spacy.load("en_core_web_sm")
@@ -13,7 +15,9 @@ def remove_tabs(sections: list) -> list:
     redact = ['-', '\n', '\t●', '\r']
     for i in range(len(sections)):
         text = sections[i]
-        text = text.replace('%', ' percent')
+        text = text.replace('  ', ' ')
+        # dont replace if using textrank for overall summary
+        # text = text.replace('%', ' percent')
         for r in redact:
             if r in text:
                 text = text.replace(r, ' ')
@@ -67,43 +71,59 @@ def get_cleaned_text(sections: list) -> list:
     lem =  lemmatize(stop)
     return lem
 
-#start TextRank
-def get_keywords(sections: list) -> list[list]:
+#start TextRank for overall summary
+def get_keywords(cleaned_text: list) -> list:
     pos = ['PROPN', 'ADJ', 'NOUN', 'VERB']
     keywords = []
-    for text in sections:
-        temp = []
+    for text in cleaned_text:
         tokens = nlp(text)
         for token in tokens:
             if token.pos_ in pos or not token.is_alpha:
-                temp.append(token.text)
-        keywords.append(temp)
+                keywords.append(token.text)
     return keywords
 
-def normalize_frequency(sections: list[list]) -> list[dict]:
-    list = []
-    for section in sections:
-        temp = {}
-        for text in section:
-            if text in temp.keys():
-                temp[text] += 1
-            else:
-                temp[text] = 1
-        temp = sorted(temp.items(), key = lambda item: item[1], reverse = True)
-        temp = dict(temp)
-        list.append(temp)
+def normalize_frequency(keywords: list) -> list:
+    dictonary = Counter(keywords)
+    highest = Counter(keywords).most_common(1)[0][1]
+    for word in dictonary.keys():
+        dictonary[word] = dictonary[word]/highest
+    return dictonary
 
-    for d in list:
-        highest = d[max(d, key = d.get)]
-        print(highest)
+def combine_text(texts: list) -> str:
+    texts = remove_tabs(texts)
+    for i in range(len(texts)):
+        text = texts[i]
+        if text[-1] != ".":
+            text += '.'
+        texts[i] = text
 
-    return list 
+    collapsed = " ".join(texts)
+    return collapsed 
 
-
-
+# get similarity of each scetence from OG text
+def scentence_similarities(keywords: dict, texts: list) -> dict:
+    similarities = {}
+    temp = ""
+    # must remove tabs before
+    # combine to one string to extract top freqencies
+    for text in texts:
+        temp += text + "."
+     
+    paragraph = nlp(temp)
+    for scentence in paragraph.sents:
+        for word in scentence:
+            if word.text in keywords.keys():
+                freq = keywords[word.text]
+                if scentence in similarities.keys():
+                    similarities[scentence] += freq
+                else:
+                    similarities[scentence] = freq
+    print(similarities)
 
 headers = parseDoc.get_headers('335.docx')
 texts = parseDoc.get_text('335.docx', headers)
-clean = get_cleaned_text(texts)
-key = get_keywords(clean)
-print(normalize_frequency(key))
+print(combine_text(texts))
+# cleaned = get_cleaned_text(texts)
+# key = get_keywords(cleaned)
+# d = normalize_frequency(key)
+# scentence_similarities(d, tabs)
