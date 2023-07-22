@@ -14,6 +14,8 @@ headers = [
     'Late Submission',
     'Important Dates'
 ]
+#return full text for TextRank
+def get_full_text(file_name: str) -> list:
 
 def get_links(file_name: str) -> dict:
     dict = {} # {rel_id: link} 
