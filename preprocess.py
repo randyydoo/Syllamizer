@@ -59,6 +59,7 @@ def tokenize(sections: list) -> list:
         sections[i] = word_tokenize(text)
     return sections
 
+# preprocessing text done
 def get_cleaned_text(sections: list) -> list:
     tabs = remove_tabs(sections)
     punctuation = remove_punct(tabs)
@@ -66,6 +67,7 @@ def get_cleaned_text(sections: list) -> list:
     lem =  lemmatize(stop)
     return lem
 
+#start TextRank
 def get_keywords(sections: list) -> list[list]:
     pos = ['PROPN', 'ADJ', 'NOUN', 'VERB']
     keywords = []
@@ -78,7 +80,7 @@ def get_keywords(sections: list) -> list[list]:
         keywords.append(temp)
     return keywords
 
-def get_frequency(sections: list[list]) -> list[dict]:
+def normalize_frequency(sections: list[list]) -> list[dict]:
     list = []
     for section in sections:
         temp = {}
@@ -89,9 +91,13 @@ def get_frequency(sections: list[list]) -> list[dict]:
                 temp[text] = 1
         temp = sorted(temp.items(), key = lambda item: item[1], reverse = True)
         temp = dict(temp)
-        print(temp)
         list.append(temp)
-    # return list 
+
+    for d in list:
+        highest = d[max(d, key = d.get)]
+        print(highest)
+
+    return list 
 
 
 
@@ -100,4 +106,4 @@ headers = parseDoc.get_headers('335.docx')
 texts = parseDoc.get_text('335.docx', headers)
 clean = get_cleaned_text(texts)
 key = get_keywords(clean)
-print(get_frequency(key))
+print(normalize_frequency(key))
