@@ -18,11 +18,15 @@ headers = [
 #return full text for TextRank
 def get_full_text(file_name: str) -> list:
     list = []
+    s = '' 
     doc = Document(file_name)
 
     for paragraph in doc.paragraphs:
-        list.append(paragraph.text)
+        for run in paragraph.runs:
+            if len(run.text) > 0:
+                s += run.text
 
+    list.append(s)
     return list
 
 def get_links(file_name: str) -> dict:
