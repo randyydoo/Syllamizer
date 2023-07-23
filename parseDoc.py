@@ -18,18 +18,12 @@ headers = [
 #return full text for TextRank
 def get_full_text(file_name: str) -> list:
     list = []
-    s = ''
     doc = Document(file_name)
 
     for paragraph in doc.paragraphs:
-        for i, run in enumerate(paragraph.runs):
-            if run.text and i == 0 and run.text not in string.punctuation and len(paragraph.runs) > 1:
-                s +=  run.text + ". "
-            else:
-                s += run.text
-    list.append(s)
-    print(list)
-get_full_text('335.docx')
+        list.append(paragraph.text)
+
+    return list
 
 def get_links(file_name: str) -> dict:
     dict = {} # {rel_id: link} 
