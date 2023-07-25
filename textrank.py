@@ -25,7 +25,7 @@ def rewrite_text(text: str) -> str:
     return output
 
 def clean_whitespace(sections: list) -> list:
-    redact = [' ', '-', '\n\n', '\n', '\t', '\r', '●', '•'] 
+    redact = ['  ', '-', '\n\n', '\n', '\t', '\r', '●', '•'] 
     for i in range(len(sections)):
         text = sections[i]
         for r in redact:
