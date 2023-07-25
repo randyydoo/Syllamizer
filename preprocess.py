@@ -1,28 +1,51 @@
 import parseDoc
+import string
+from collections import Counter
+import openai
+import os
 import numpy as np
 import spacy
 import nltk
-import string
-from nltk import sent_tokenize, word_tokenize
-from nltk.cluster.util import cosine_distance
-from collections import Counter
+from nltk.tokenize import sent_tokenize, word_tokenize
 
 nltk.download('punkt')
 nlp = spacy.load("en_core_web_sm")
+openai.api_key = "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"
 
+def rewrite_text(text: str) -> str:
+    max_tokens = len(word_tokenize(text))
+    prompt = "Given this text from a syllabus, can you rewrite it with grammatically correct scentences within the same context. You can also remove the paragraph name if applicable and I want it in scentence form"  + text
+    response = openai.Completion.create(
+    engine= "text-davinci-003",  
+    prompt= prompt,
+    max_tokens=max_tokens,)
 
-def remove_tabs(sections: list) -> list:
-    redact = ['-', '\n', '\t●', '\r']
+    output = response['choices'][0]['text']
+    return output
+
+def clean_whitespace(sections: list) -> list:
     for i in range(len(sections)):
         text = sections[i]
         text = text.replace('  ', ' ')
-        # dont replace if using textrank for overall summary
-        # text = text.replace('%', ' percent')
+        text = text.replace('-', ' ')
+        text = text.replace('\n\n', '')
+        text = text.replace('\n', '')
+        text = text.replace('\t', '')
+        text = text.replace('\r', '')
+        sections[i] = text
+
+    return sections
+
+def remove_lists(cleaned: list) -> list:
+    redact = ['1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', 'a.', 'b.', 'c.', 'd.', 'e.', 'f.', 'g.', 'h.', '●', '•']
+    for i in range(len(cleaned)):
+        text = cleaned[i]
         for r in redact:
             if r in text:
-                text = text.replace(r, ' ')
-        sections[i] = text
-    return sections
+                text = rewrite_text(text)
+        cleaned[i] = text
+
+    return cleaned
 
 def remove_punct(sections: list) -> list:
     for i in range(len(sections)):
@@ -32,6 +55,7 @@ def remove_punct(sections: list) -> list:
             if token.is_punct:
                 text = text.replace(token.text, ' ')
         sections[i] = text
+
     return sections
 
 def remove_stopwords(sections: list) -> list:
@@ -43,6 +67,7 @@ def remove_stopwords(sections: list) -> list:
             if not token.is_stop:
                 s += token.text + ' '
         sections[i] = s
+
     return sections
 
 def lemmatize(sections: list) -> list:
@@ -57,18 +82,13 @@ def lemmatize(sections: list) -> list:
         sections[i] = s
     return sections
 
-def tokenize(sections: list) -> list:
-    for i in range(len(sections)):
-        text = sections[i].strip()
-        sections[i] = word_tokenize(text)
-    return sections
-
 # preprocessing text done
-def get_cleaned_text(sections: list) -> list:
-    tabs = remove_tabs(sections)
-    punctuation = remove_punct(tabs)
-    stop = remove_stopwords(punctuation)
-    lem =  lemmatize(stop)
+def get_cleaned_text(full_text: list) -> list:
+    cleaned_whitespace = clean_whitespace(full_text)
+    removed_lists = remove_lists(cleaned_whitespace)
+    cleaned_punct = remove_punct(removed_lists)
+    cleaned_stop = remove_stopwords(cleaned_punct)
+    lem = lemmatize(cleaned_stop)
     return lem
 
 #start TextRank for overall summary
@@ -89,41 +109,51 @@ def normalize_frequency(keywords: list) -> list:
         dictonary[word] = dictonary[word]/highest
     return dictonary
 
-def combine_text(texts: list) -> str:
-    texts = remove_tabs(texts)
-    for i in range(len(texts)):
-        text = texts[i]
-        if text[-1] != ".":
-            text += '.'
-        texts[i] = text
-
-    collapsed = " ".join(texts)
-    return collapsed 
-
 # get similarity of each scetence from OG text
-def scentence_similarities(keywords: dict, texts: list) -> dict:
-    similarities = {}
-    temp = ""
-    # must remove tabs before
-    # combine to one string to extract top freqencies
-    for text in texts:
-        temp += text + "."
-     
-    paragraph = nlp(temp)
-    for scentence in paragraph.sents:
-        for word in scentence:
-            if word.text in keywords.keys():
-                freq = keywords[word.text]
-                if scentence in similarities.keys():
-                    similarities[scentence] += freq
-                else:
-                    similarities[scentence] = freq
-    print(similarities)
+def scentence_similarities(keywords: dict, text: str) -> dict:
+    scores = {}
+    doc = nlp(text)
 
-headers = parseDoc.get_headers('335.docx')
-texts = parseDoc.get_text('335.docx', headers)
-print(combine_text(texts))
-# cleaned = get_cleaned_text(texts)
-# key = get_keywords(cleaned)
-# d = normalize_frequency(key)
-# scentence_similarities(d, tabs)
+    for scentence in doc.sents:
+        for token in scentence:
+            if token.text in keywords.keys():
+                freq = keywords[scentence]
+                if scentence in scores.keys():
+                    scores[scentence] += freq
+                else:
+                    scores[scentence] = freq
+
+    sort = sorted(scores, key = scores.get, reverse = True)
+    return sort
+
+def get_string(text: list) ->str:
+    s = ''
+    for scentence in text:
+        scentence = scentence.capitalize()
+        if scentence[-1] not in string.punctuation and len(scentence.strip()) > 20:
+            s += f'{scentence.strip()}.'
+        elif len(scentence.strip()) > 20:
+            s += scentence
+    return s
+
+def get_top_scentences(whole_text: list) -> str:
+    top_sents = []
+    c = get_cleaned_text(whole_text)
+    keys = get_keywords(c)
+    freq = normalize_frequency(keys)
+
+    white = clean_whitespace(whole_text)
+    txt = remove_lists(white)
+    txt_string = get_string(txt)
+    similarity = scentence_similarities(freq,txt_string) 
+    
+    for i in range(5):
+        top_sents.append(similarity[i].text)
+
+    summary = " ".join(top_sents)
+    print(rewrite_text(summary))
+
+
+full = parseDoc.get_full_text('335.docx')
+get_top_scentences(full)
+
