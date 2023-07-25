@@ -12,9 +12,10 @@ nltk.download('punkt')
 nlp = spacy.load("en_core_web_sm")
 openai.api_key = "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"
 
+
 def rewrite_text(text: str) -> str:
     max_tokens = len(word_tokenize(text))
-    prompt = "Given this text from a syllabus, can you rewrite it with grammatically correct scentences within the same context. You can also remove the paragraph name if applicable and I want it in scentence form"  + text
+    prompt = "Given this text from a syllabus, can you perform a sentence-level rewrite for each sentence while maintaining grammatical correctness and context. You can also remove any paragraph names if applicable and scentences that are incomplete due to missing contact informaiton. Please provide the output in sentence form. The text is as follows:"  + text
     response = openai.Completion.create(
     engine= "text-davinci-003",  
     prompt= prompt,
@@ -136,8 +137,9 @@ def get_string(text: list) ->str:
             s += scentence
     return s
 
-def get_top_scentences(whole_text: list) -> str:
+def get_top_scentences(file_name: str) -> str:
     top_sents = []
+    whole_text = parseDoc.get_full_text(file_name)
     c = get_cleaned_text(whole_text)
     keys = get_keywords(c)
     freq = normalize_frequency(keys)
@@ -151,9 +153,7 @@ def get_top_scentences(whole_text: list) -> str:
         top_sents.append(similarity[i].text)
 
     summary = " ".join(top_sents)
-    print(rewrite_text(summary))
+    return rewrite_text(summary)
 
 
-full = parseDoc.get_full_text('335.docx')
-get_top_scentences(full)
 
