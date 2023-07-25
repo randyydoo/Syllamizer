@@ -1,3 +1,4 @@
+import textrank
 from docx import Document
 from docx.opc.constants import RELATIONSHIP_TYPE as rt
 import string
@@ -87,11 +88,9 @@ def get_text(file_name: str, h: list[list[str, int]]) -> list:
         else:
             list.append(text[len(header):])
 
-    for i in range(len(list)):
-        text = list[i]
-        list[i] = text.strip()
+    lst = textrank.clean_whitespace(list)
 
-    return list
+    return lst
 
 def get_headers_and_text(h: list[list[str, int]], t: list[str]) -> dict:
     dict = {}
