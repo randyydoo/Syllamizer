@@ -15,18 +15,20 @@ headers = [
     'Late Submission',
     'Important Dates'
 ]
+
 #return full text for TextRank
 def get_full_text(file_name: str) -> list:
     list = []
-    s = '' 
+    s = ''
     doc = Document(file_name)
 
-    for paragraph in doc.paragraphs:
-        for run in paragraph.runs:
-            if len(run.text) > 0:
-                s += run.text
-
-    list.append(s)
+    for i, paragraph in enumerate(doc.paragraphs):
+        for j, run in enumerate(paragraph.runs):
+            if run.bold and j == 0 and len(s) > 5:
+                list.append(s)
+                s = run.text
+            elif len(run.text) > 15:
+                s += run.text 
     return list
 
 def get_links(file_name: str) -> dict:
