@@ -1,6 +1,7 @@
 from docx import Document
 import PyPDF2
 
+
 redact = ['Grade', 'Grades','Percentage', 'A:', 'A-']
 
 def is_bold(cell: 'class') -> bool:
