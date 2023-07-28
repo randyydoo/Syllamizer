@@ -1,12 +1,12 @@
 from datasets import load_dataset
-from evaluate import load
+import evaluate
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 import nltk
 import numpy as np
 import torch
 
 dataset = load_dataset("xsum")
-metric = load("rouge")
+metric = evaluate.load("rouge")
 
 tokenizer = AutoTokenizer.from_pretrained('t5-small')
 device = 'mps' if torch.backends.mps.is_available() else "cpu"
@@ -17,8 +17,7 @@ data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 def preprocess(examples):
     inputs = []
     for doc in examples['document']:
-        text = 'Summarize: ' + doc
-        inputs.append(text)
+        inputs.append('Summarize: ' + doc)
 
     model_inputs = tokenizer(inputs, max_length=1024, truncation=True)
     labels = tokenizer(text_target=examples["summary"], max_length=256, truncation=True)
@@ -27,22 +26,26 @@ def preprocess(examples):
 
     return model_inputs
 
-def compute_metrics(prediction: tuple):
-    #prediction = (model pred, label(target))
-    predictions, labels = prediction
-    decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
-    # Replace -100 in the labels as we can't decode them.
+def compute_metrics(model_preds: tuple) ->float:
+    # (input_ids, labels) tokenized
+    predictions, labels = model_preds
+    decode_predictions = tokenizer.batch_decode(predictions, skip_special_tokens=True)
+
+    # replace non decodable tokens with -100
     labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+    decode_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
     
     # join scentences
-    decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
-    decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
-    
+    decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decode_predictions]
+    decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decode_labels]
+
+    # compute similarity 
     result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True, use_aggregator=True)
 
+    # get a some results
     result = {key: value * 100 for key, value in result.items()}
     
+    # Add mean generated length
     prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions]
     result["gen_len"] = np.mean(prediction_lens)
     
@@ -50,8 +53,8 @@ def compute_metrics(prediction: tuple):
 
 def train() -> None:
     tokenized_datasets = dataset.map(preprocess, batched=True)
-    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(560))
-    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(560))
+    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(36))
+    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(36))
 
     args = Seq2SeqTrainingArguments(
         output_dir = 'model-tests',
@@ -61,12 +64,13 @@ def train() -> None:
         per_device_eval_batch_size=8,
         weight_decay=0.01,
         save_total_limit=3,
+        predict_with_generate=True,
         num_train_epochs=1,
     )
 
     trainer = Seq2SeqTrainer(
-        model,
-        args,
+        model=model,
+        args=args,
         train_dataset=small_train_dataset,
         eval_dataset=small_eval_dataset,
         data_collator=data_collator,
