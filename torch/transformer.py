@@ -53,15 +53,21 @@ def compute_metrics(model_preds: tuple) ->float:
 
 def train() -> None:
     tokenized_datasets = dataset.map(preprocess, batched=True)
-    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(36))
-    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(36))
+    small_train_dataset, small_eval_dataset = {}, {}
+
+    #train with sets of 800 
+    small_train_dataset['document'] = tokenized_datasets['train']['document'][:800]
+    small_train_dataset['summary'] = tokenized_datasets['train']['summary'][:800]
+
+    small_eval_dataset['document'] = tokenized_datasets['validation']['document'][:800]
+    small_eval_dataset['summary'] = tokenized_datasets['validation']['summary'][:800]
 
     args = Seq2SeqTrainingArguments(
         output_dir = 'model-tests',
         evaluation_strategy = "epoch",
         learning_rate=2e-5,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
         weight_decay=0.01,
         save_total_limit=3,
         predict_with_generate=True,
