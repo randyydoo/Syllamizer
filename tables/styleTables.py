@@ -95,3 +95,4 @@ def get_xlsx(file_name: str) -> None:
         widths = get_longest_str(d)
         max_width.append(widths)
 
+get_tables('335.docx')

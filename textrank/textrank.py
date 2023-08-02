@@ -147,11 +147,12 @@ def get_top_scentences(file_name: str) -> str:
     txt_string = get_string(txt)
     similarity = scentence_similarities(freq,txt_string) 
     
-    for i in range(5):
+    for i in range(8):
         top_sents.append(similarity[i].text)
 
     summary = " ".join(top_sents)
     return rewrite_text(summary)
+
 
 
 
