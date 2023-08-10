@@ -56,11 +56,11 @@ def train() -> None:
     small_train_dataset, small_eval_dataset = {}, {}
 
     #train with sets of 800 
-    small_train_dataset['document'] = tokenized_datasets['train']['document'][800:1600]
-    small_train_dataset['summary'] = tokenized_datasets['train']['summary'][800:1600]
+    small_train_dataset['document'] = tokenized_datasets['train']['document'][1600:2400]
+    small_train_dataset['summary'] = tokenized_datasets['train']['summary'][1600:2400]
 
-    small_eval_dataset['document'] = tokenized_datasets['validation']['document'][800:1600]
-    small_eval_dataset['summary'] = tokenized_datasets['validation']['summary'][800:1600]
+    small_eval_dataset['document'] = tokenized_datasets['validation']['document'][1600:2400]
+    small_eval_dataset['summary'] = tokenized_datasets['validation']['summary'][1600:2400]
 
     args = Seq2SeqTrainingArguments(
         output_dir = 'model-tests',
