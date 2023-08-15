@@ -93,4 +93,3 @@ def get_xlsx(file_name: str) -> None:
     for d in data_frames:
         widths = get_longest_str(d)
         max_width.append(widths)
-create_xlsx('335.docx')
