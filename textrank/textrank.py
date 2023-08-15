@@ -135,9 +135,9 @@ def get_string(text: list) ->str:
             s += scentence
     return s
 
-def get_top_scentences(file_name: str) -> str:
+def get_top_scentences(file_name: str, text: list) -> str:
     top_sents = []
-    whole_text = parseDoc.get_full_text(file_name)
+    whole_text = text
     c = get_cleaned_text(whole_text)
     keys = get_keywords(c)
     freq = normalize_frequency(keys)
