@@ -1,27 +1,33 @@
 from pdf2docx import Converter
 from docx import Document
-import tables.styleTables as t
-import tables.parseTables as p
-import textrank
-import torch
+import tables.styleTables as st
+import tables.parseTables as pt
+import textrank.parseDoc as pd
+import textrank.textRank as tr
+import torch.generate as tg
 
 def run() -> None:
     file_name = get_file_name()
     
     # create xlsx file
-    keys = p.get_keys(file_name)
-    conts = p.get_contents(file_name)
+    keys = pt.get_keys(file_name)
+    conts = pt.get_contents(file_name)
 
-    t.create_xlsx(file_name, keys, conts)
+    st.create_xlsx(file_name, keys, conts)
 
+    # get textrank text
+    full_text = pd.get_full_text(file_name)
+    textrank_text = tr.get_top_scentences(file_name, full_text)
+    
+    # get t5 text
+    doc_headers = pd.get_headers(file_name)
+    doc_text = pd.get_text(file_name, doc_headers)
+
+
+    t5_text = tg.generate_summary(doc_text)
+    
     # create doc
     doc = Document()
-
-    doc_headers = textrank.parseDoc.get_headers(file_name)
-    doc_text = textrank.parseDoc.get_text(file_name, doc_headers)
-
-    textrank_text = textrank.get_top_scentences(file_name)
-    t5_text = torch.generate.generate_summary(doc_text)
 
     doc.add_heading('Syllabus Summaries from Pytorch and TextRank', 0)
 
