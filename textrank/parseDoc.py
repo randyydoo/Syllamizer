@@ -15,6 +15,17 @@ headers = [
     'Late Submission',
     'Important Dates'
 ]
+def clean_whitespace(sections: list) -> list:
+    redact = ['  ', '-', '\n\n', '\n', '\t', '\r', '●', '•']
+    for i in range(len(sections)):
+        text = sections[i]
+        for r in redact:
+            text = text.replace(r, '')
+
+        sections[i] = text
+    s = " ".join(sections)
+
+    return s
 
 #return full text for TextRank
 def get_full_text(file_name: str) -> list:
@@ -87,7 +98,7 @@ def get_text(file_name: str, h: list[list[str, int]]) -> list:
         else:
             list.append(text[len(header):])
 
-    lst = textrank.clean_whitespace(list)
+    lst = clean_whitespace(list)
 
     return lst
 
