@@ -7,18 +7,17 @@ import numpy as np
 import torch
 
 
-tb_writer = SummaryWriter('logs')
 
 dataset = load_dataset("xsum")
 metric = evaluate.load("rouge")
 
 
 tokenizer = AutoTokenizer.from_pretrained('t5-small')
-tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True
 
 device = 'mps' if torch.backends.mps.is_available() else "cpu"
+print(device)
 
-model = AutoModelForSeq2SeqLM.from_pretrained('T5-Summarizer-Model')
+model = AutoModelForSeq2SeqLM.from_pretrained('SumModel')
 model = model.to(device)
 
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
@@ -54,11 +53,6 @@ def compute_metrics(model_preds: tuple) ->float:
     # get a some results
     result = {key: value * 100 for key, value in result.items()}
     
-    for key, value in result.items():
-        tb_writer.add_scalar(f"eval/{key}", value, global_step=trainer.global_step)
-
-    tb_writer.close()
-
     # Add mean generated length
     prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions]
     result["gen_len"] = np.mean(prediction_lens)
@@ -95,7 +89,7 @@ def train() -> None:
         compute_metrics=compute_metrics,
     )
     trainer.train()
-    trainer.save_model('T5-Summarizer-Model')
-
+    tokenizer.save_pre_trained('SumModel')
+    trainer.save_model('SumModel')
 
 train()
