@@ -1,4 +1,3 @@
-import textrank
 from docx import Document
 from docx.opc.constants import RELATIONSHIP_TYPE as rt
 import string
