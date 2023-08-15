@@ -9,9 +9,13 @@ dataset = load_dataset("xsum")
 metric = evaluate.load("rouge")
 
 tokenizer = AutoTokenizer.from_pretrained('t5-small')
+tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True
+
 device = 'mps' if torch.backends.mps.is_available() else "cpu"
+
 model = AutoModelForSeq2SeqLM.from_pretrained('t5-small')
 model = model.to(device)
+
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 
 def preprocess(examples):
@@ -53,16 +57,15 @@ def compute_metrics(model_preds: tuple) ->float:
 
 def train() -> None:
     tokenized_datasets = dataset.map(preprocess, batched=True)
-    small_train_dataset, small_eval_dataset = {}, {}
 
     #train with sets of 800 
-    small_train_dataset['document'] = tokenized_datasets['train']['document'][1600:2400]
-    small_train_dataset['summary'] = tokenized_datasets['train']['summary'][1600:2400]
+    small_train_dataset = tokenized_datasets['train'].select(range(400))
+    small_eval_dataset = tokenized_datasets['validation'].select(range(400))
 
-    small_eval_dataset['document'] = tokenized_datasets['validation']['document'][1600:2400]
-    small_eval_dataset['summary'] = tokenized_datasets['validation']['summary'][1600:2400]
+    
 
     args = Seq2SeqTrainingArguments(
+        optim='adamw_torch',
         output_dir = 'model-tests',
         evaluation_strategy = "epoch",
         learning_rate=2e-5,
