@@ -1,16 +1,15 @@
 import torch
-from transformers import T5Tokenizer, TFT5ForConditionalGeneration
+from transformers import T5Tokenizer, TFT5ForConditionalGeneration, pipeline
 
 
 def generate_summary(text: str) -> str:
-    model_name = 'T5-Summarizer-Model'
-    tokenizer = T5Tokenizer.from_pretrained(model_name)
-    model = TFT5ForConditionalGeneration.from_pretrained(model_name)
+    model_name = './SumModel'
 
-    inputs = tokenizer.encode('Summarize: 'text, return_tensors='pt', truncation=True)
-    outputs = model.generate(inputs, decoder_input_ids=inputs)
+    pipe = pipeline('summarization', model=model_name, max_length=50)
+    summ = pipline(text) 
 
-    summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    text = summ[0]['summary_text'] + '.'
+    text = text.strip()
 
-    return summary
+    return text
 
