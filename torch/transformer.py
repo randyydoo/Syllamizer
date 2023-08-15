@@ -1,19 +1,24 @@
 from datasets import load_dataset
 import evaluate
+from torch.utils.tensorboard import SummaryWriter
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 import nltk
 import numpy as np
 import torch
 
+
+tb_writer = SummaryWriter('logs')
+
 dataset = load_dataset("xsum")
 metric = evaluate.load("rouge")
+
 
 tokenizer = AutoTokenizer.from_pretrained('t5-small')
 tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True
 
 device = 'mps' if torch.backends.mps.is_available() else "cpu"
 
-model = AutoModelForSeq2SeqLM.from_pretrained('t5-small')
+model = AutoModelForSeq2SeqLM.from_pretrained('T5-Summarizer-Model')
 model = model.to(device)
 
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
@@ -49,6 +54,11 @@ def compute_metrics(model_preds: tuple) ->float:
     # get a some results
     result = {key: value * 100 for key, value in result.items()}
     
+    for key, value in result.items():
+        tb_writer.add_scalar(f"eval/{key}", value, global_step=trainer.global_step)
+
+    tb_writer.close()
+
     # Add mean generated length
     prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions]
     result["gen_len"] = np.mean(prediction_lens)
@@ -58,10 +68,9 @@ def compute_metrics(model_preds: tuple) ->float:
 def train() -> None:
     tokenized_datasets = dataset.map(preprocess, batched=True)
 
-    #train with sets of 800 
-    small_train_dataset = tokenized_datasets['train'].select(range(400))
-    small_eval_dataset = tokenized_datasets['validation'].select(range(400))
-
+    #train with sets of 400 
+    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(16))
+    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(16))
     
 
     args = Seq2SeqTrainingArguments(
@@ -74,9 +83,8 @@ def train() -> None:
         weight_decay=0.01,
         save_total_limit=3,
         predict_with_generate=True,
-        num_train_epochs=1,
+        num_train_epochs=1
     )
-
     trainer = Seq2SeqTrainer(
         model=model,
         args=args,
@@ -84,8 +92,10 @@ def train() -> None:
         eval_dataset=small_eval_dataset,
         data_collator=data_collator,
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics,
     )
     trainer.train()
     trainer.save_model('T5-Summarizer-Model')
+
+
 train()
