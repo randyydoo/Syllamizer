@@ -1,7 +1,6 @@
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 import pandas as pd
-import parseTables
 
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -49,10 +48,10 @@ def apply_keys_styles(row: int, sheet: object) -> None:
 
 
 
-def create_xlsx(file_name: str) -> None:
+def create_xlsx(file_name: str, k: list, c: list) -> None:
     wb = Workbook() 
-    keys = parseTables.get_keys(file_name)
-    contents = parseTables.get_contents(file_name)
+    keys = k
+    contents = k
 
     for i, lst in enumerate(keys):
         temp_sheet = wb.create_sheet(f'Table {i + 1}', i)
@@ -94,4 +93,4 @@ def get_xlsx(file_name: str) -> None:
     for d in data_frames:
         widths = get_longest_str(d)
         max_width.append(widths)
-
+create_xlsx('335.docx')
