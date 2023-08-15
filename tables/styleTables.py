@@ -51,7 +51,7 @@ def apply_keys_styles(row: int, sheet: object) -> None:
 def create_xlsx(file_name: str, k: list, c: list) -> None:
     wb = Workbook() 
     keys = k
-    contents = k
+    contents = c
 
     for i, lst in enumerate(keys):
         temp_sheet = wb.create_sheet(f'Table {i + 1}', i)
