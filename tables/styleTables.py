@@ -49,7 +49,7 @@ def apply_keys_styles(row: int, sheet: object) -> None:
 
 
 
-def get_file(file_name: str) -> None:
+def create_xlsx(file_name: str) -> None:
     wb = Workbook() 
     keys = parseTables.get_keys(file_name)
     contents = parseTables.get_contents(file_name)
@@ -68,7 +68,7 @@ def get_file(file_name: str) -> None:
             longest = get_col_max(i, k, keys,contents)
             temp_sheet.column_dimensions[col].width = longest + 10
 
-    wb.save('ran.xlsx')
+    wb.save('tables.xlsx')
 
 
 def get_xlsx(file_name: str) -> None:
@@ -95,4 +95,3 @@ def get_xlsx(file_name: str) -> None:
         widths = get_longest_str(d)
         max_width.append(widths)
 
-get_tables('335.docx')
